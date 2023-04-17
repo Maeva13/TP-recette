@@ -1,5 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Button, Stack, TextField } from '@mui/material'
+import { Directus } from '@directus/sdk';
+import "../css/connexion.css"
 
 const Login = () => {
   const navigate = useNavigate(); 
@@ -8,41 +11,25 @@ const Login = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Vérification des informations de connexion
-    if (email === 'user@user.fr' && password === 'user') {
-      // Stockage des informations de connexion dans le localStorage
-      localStorage.setItem('isLoggedIn', true);
-      localStorage.setItem('userEmail', email);
-      // Redirection vers la page de profil
-      navigate('/recette'); 
-    } else {
-      alert('Adresse e-mail ou mot de passe incorrect');
-    }
+
+    const directus = new Directus('http://localhost:8055');
+    directus.auth
+      .login({email, password})
+      .then(({ token }) => {
+        localStorage.setItem('isLoggedIn', true);
+        localStorage.setItem('authToken', token);
+        navigate('/recette')
+      })
+      .catch(() => {
+        alert('Adresse e-mail ou mot de passe incorrect');
+      })
   };
 
-  return (
-    <form onSubmit={handleSubmit}>
-      <div>
-        <label htmlFor="email">Adresse e-mail</label>
-        <input
-          type="email"
-          id="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-      </div>
-      <div>
-        <label htmlFor="password">Mot de passe</label>
-        <input
-          type="password"
-          id="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-      </div>
-      <button type="submit">Se connecter</button>
-    </form>
-  );
+  return <Stack className="loginForm" onSubmit={handleSubmit}>
+    <TextField label="Email" variant="outlined" onChange={({ target: { value }}) => setEmail(value)} />
+    <TextField label="Mot de passe" variant="outlined" type="password" onChange={({ target: { value }}) => setPassword(value)} />
+    <Button variant="contained" onClick={handleSubmit}>Se connecter</Button>
+  </Stack>
 };
 
 export default Login;

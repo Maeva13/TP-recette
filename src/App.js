@@ -1,18 +1,17 @@
 import { Link, Routes, Route } from 'react-router-dom';
-import './App.css';
 import Login from './components/connexion';
 import {Recette} from './components/recette';
 
 function App() {
   return (
-    <div className="App">
+    <div id="app">
       <nav>
-        <Link to="/">Connexion </Link>
+        <Link to="/login">Connexion </Link>
         <Link to="/recette"> Liste des recettes</Link>
       </nav>
 
       <Routes>
-        <Route path="/" element={<Login />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/recette" element={<Recette />} />
       </Routes>  
     </div>
