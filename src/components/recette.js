@@ -1,55 +1,38 @@
-import { useNavigate } from 'react-router-dom';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { Directus } from '@directus/sdk';
 
 export function Recette() {
-  const navigate = useNavigate(); // Naviguer entre les différentes pages de l'application
-  const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true'; // Vérification si l'utilisateur est connecté en récupérant l'information dans le localStorage
-
-  function handleLogout() {
-    // Déconnecter l'utilisateur en supprimant les informations de connexion du localStorage et en le redirigeant vers la page de connexion
-    localStorage.removeItem('isLoggedIn');
-    localStorage.removeItem('username');
-    navigate('/');
-  }
-
   return (
     <div>
-      {isLoggedIn ? (
-        <div>
-          <button onClick={handleLogout}>Se déconnecter</button>
-          <RecetteList/> 
-        </div>
-      ) : (
-        <p>Vous devez être connecté pour accéder à cette page.</p>
-      )}
+      <RecetteList/> 
     </div>
   );
 }
 
-const RecetteList = () => {
-  const [recipes, setRecipes] = useState([ 
-    {
-      name: 'Pancakes',
-      ingredients: [
-        { name: 'Farine', amount: '1 tasse' },
-        { name: 'Sucre', amount: '2 cuillères à soupe' },
-        { name: 'Oeufs', amount: '2' },
-        { name: 'Lait', amount: '1 tasse' },
+function RecetteList() {
+  const [recipes, setRecipes] = useState([])
+
+  useEffect(() => {
+    const directus = new Directus('http://localhost:8055');
+    directus.items('recipe').readByQuery({
+      fields: [
+        "name",
+        "ingredients.quantity",
+        "ingredients.ingredient_id.name",
+        "ingredients.ingredient_id.unit.iso",
       ],
-    },
-    {
-      name: 'Gâteau au chocolat',
-      ingredients: [
-        { name: 'Farine', amount: '2 tasses' },
-        { name: 'Sucre', amount: '1 1/2 tasse' },
-        { name: 'Oeufs', amount: '4' },
-        { name: 'Beurre', amount: '1/2 tasse' },
-        { name: 'Cacao en poudre', amount: '3/4 tasse' },
-        { name: 'Lait', amount: '1 tasse' },
-        { name: 'Levure chimique', amount: '2 cuillères à café' },
-      ],
-    },
-  ]);
+      limit: 5
+    })
+    .then(({ data }) => {
+      setRecipes(data.map(recipe => ({
+        name: recipe.name,
+        ingredients: recipe.ingredients.map(ingredient => ({
+          name: ingredient.ingredient_id.name,
+          amount: ingredient.quantity + ' ' + ingredient.ingredient_id.unit.iso
+        }))
+      })));
+    })
+  }, [])
 
   const [currentRecipe, setCurrentRecipe] = useState(null); // Etat de la recette sélectionnée 
   const [currentIngredient, setCurrentIngredient] = useState(null); // Etat de l'ingrédient  sélectionné 
