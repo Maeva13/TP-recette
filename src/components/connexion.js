@@ -2,19 +2,19 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
-  const navigate = useNavigate(); // <-- import the useNavigate hook
+  const navigate = useNavigate(); 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
     // Vérification des informations de connexion
-    if (email === 'user@user.fr' && password === 'p') {
+    if (email === 'user@user.fr' && password === 'user') {
       // Stockage des informations de connexion dans le localStorage
       localStorage.setItem('isLoggedIn', true);
       localStorage.setItem('userEmail', email);
       // Redirection vers la page de profil
-      navigate('/recette'); // <-- use the navigate function instead of useHistory
+      navigate('/recette'); 
     } else {
       alert('Adresse e-mail ou mot de passe incorrect');
     }
