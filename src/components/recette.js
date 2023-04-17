@@ -17,6 +17,8 @@ function RecetteList() {
     directus.items('recipe').readByQuery({
       fields: [
         "name",
+        "instruction",
+        "Image",
         "ingredients.quantity",
         "ingredients.ingredient_id.name",
         "ingredients.ingredient_id.unit.iso",
@@ -26,9 +28,11 @@ function RecetteList() {
     .then(({ data }) => {
       setRecipes(data.map(recipe => ({
         name: recipe.name,
+        instruction : recipe.instruction,
+        image : recipe.Image,
         ingredients: recipe.ingredients.map(ingredient => ({
           name: ingredient.ingredient_id.name,
-          amount: ingredient.quantity + ' ' + ingredient.ingredient_id.unit.iso
+          amount: ingredient.quantity + ' ' + (ingredient.ingredient_id.unit.iso || '')
         }))
       })));
     })
@@ -62,6 +66,7 @@ function RecetteList() {
         {recipes.map((recipe) => (
           <li key={recipe.name}>
             {recipe.name}
+            {' '} 
             <button onClick={() => RecetteClick(recipe)}>Voir la recette</button>
           </li>
         ))}
@@ -70,6 +75,7 @@ function RecetteList() {
       {currentRecipe && ( // Affichage de la recette sélectionnée
         <div>
           <h2>{currentRecipe.name}</h2>
+          <div dangerouslySetInnerHTML={{ __html: currentRecipe.instruction }} />
           <ul>
             {currentRecipe.ingredients.map((ingredient, index) => ( // Affichage de la liste des ingrédients de la recette
               <li key={ingredient.name}>
@@ -91,12 +97,14 @@ function RecetteList() {
                 ) : (
                   <div>
                     {ingredient.name}: {ingredient.amount} 
+                    {' '} 
                     <button onClick={() => IngredientClick(index)}>Editer</button>
                   </div>
                 )}
               </li>
             ))}
           </ul>
+          <img src={currentRecipe.image} />
         </div>
       )}
     </div>
